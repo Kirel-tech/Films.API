@@ -18,12 +18,12 @@ namespace Films.Core
         /// Initializes a new instance of the <see cref="FilmService"/> class.
         /// </summary>
         /// <param name="filmRepository">The repository for accessing film data.</param>
+        /// <param name="mapper">AutoMapper instance</param>
         public FilmService(IKirelGenericEntityRepository<int, Film> filmRepository, IMapper mapper)
         {
             this._filmRepository = filmRepository;
             _mapper = mapper;
         }
-        
         /// <summary>
         /// Searches for films in the database by name.
         /// </summary>
@@ -125,6 +125,10 @@ namespace Films.Core
         /// </summary>
         public class FilmNotFoundException : Exception
         {
+            /// <summary>
+            /// Retrieves exception message 
+            /// </summary>
+            /// <param name="message"></param>
             public FilmNotFoundException(string message) : base(message)
             {
             }

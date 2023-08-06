@@ -20,11 +20,11 @@ namespace Films.Infrastructure
         /// <summary>
         /// Gets or sets the DbSet for films in the database.
         /// </summary>
-        private DbSet<Film> Films { get; set; }
+        private DbSet<Film>? Films { get; set; }
         
         /// <summary>
         /// Gets or sets the DbSet for genres in the database.
         /// </summary>
-        private DbSet<Genre> Genres { get; set; }
+        private DbSet<Genre>? Genres { get; set; }
     }
 }
