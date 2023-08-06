@@ -1,20 +1,19 @@
-
 using System.Reflection;
 using Films.Core;
 using Films.Domain;
 using Films.Infrastructure;
 using Kirel.Repositories;
 using Kirel.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;                            
 
 var builder = WebApplication.CreateBuilder(args);
 
 /*var authOptions = builder.Configuration.GetSection("AuthOptions").Get<AuthOptions>();*/
 
 //taking connection string from appsettings.json 
-var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
+var connectionString = builder.Configuration.GetConnectionString("PostgreConnection");
 builder.Services.AddDbContext<FilmDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Add services to the container.
 builder.Services.AddScoped<FilmService>();

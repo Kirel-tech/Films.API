@@ -88,19 +88,38 @@ namespace Films.Core
         }
         
         /// <summary>
-        /// Gets a list of all films.
+        /// Retrieves a paginated list of all films in the database.
         /// </summary>
-        /// <returns>A list of film DTOs representing all films in the database.</returns>
-        public async Task<IEnumerable<FilmDto>> GetAllFilms()
+        /// <param name="pageNumber">Page number of the paginated results.</param>
+        /// <param name="pageSize">Number of items per page.</param>
+        /// <param name="orderBy">Field by which the results should be ordered.</param>
+        /// <param name="orderDirection">Sorting direction (ascending or descending).</param>
+        /// <param name="search">Search term to filter the results.</param>
+        /// <returns>Paginated result containing a list of FilmDto objects.</returns>
+        public async Task<PaginatedResult<List<FilmDto>>> GetAllFilmsPaginated(int pageNumber = 0, int pageSize = 0,
+            string orderBy = "", SortDirection orderDirection = SortDirection.Asc, string search = "")
         {
-            // Get the total count of films in the database.
-            var allCount = await _filmRepository.Count(expression: null);
+            // Get the total count of films in the database based on the search criteria.
+            var totalCount = await _filmRepository.Count(search);
 
-            // Retrieve a paginated list of all films and map them to DTOs.
-            var films = await _filmRepository.GetList(null, "Created", SortDirection.Asc, 1, allCount);
+            // Generate pagination information.
+            var pagination = Pagination.Generate(pageNumber, pageSize, totalCount);
+
+            // Retrieve a paginated list of films based on the pagination and sorting parameters.
+            var films = await _filmRepository.GetList(search, orderBy, orderDirection, pagination.CurrentPage, pagination.PageSize);
+    
+            // Map the retrieved films to DTOs.
             var filmsDto = _mapper.Map<List<FilmDto>>(films);
-            return filmsDto;
+
+            // Create and return the paginated result.
+            var result = new PaginatedResult<List<FilmDto>>
+            {
+                Pagination = pagination,
+                Data = filmsDto
+            };
+            return result;
         }
+
 
         /// <summary>
         /// Deletes a film from the database.

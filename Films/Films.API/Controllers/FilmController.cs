@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Films.Domain;
+using Kirel.Repositories.Sorts;
 
 namespace Films.API.Controllers
 {
@@ -50,15 +52,22 @@ namespace Films.API.Controllers
         }
 
         /// <summary>
-        /// Gets all films.
+        /// Retrieves a paginated list of films based on the specified parameters.
         /// </summary>
-        /// <returns>Returns a list of all films.</returns>
+        /// <param name="pageNumber">Page number of the paginated results.</param>
+        /// <param name="pageSize">Number of items per page.</param>
+        /// <param name="orderBy">Field by which the results should be ordered.</param>
+        /// <param name="orderDirection">Sorting direction (ascending or descending).</param>
+        /// <param name="search">Search term to filter the results.</param>
+        /// <returns>Paginated result containing a list of FilmDto objects.</returns>
         [HttpGet("all")]
-        public async Task<ActionResult<List<FilmDto>>> GetAllFilms()
+        public async Task<ActionResult<PaginatedResult<List<FilmDto>>>> GetAllFilms(
+            int pageNumber = 0, int pageSize = 10,
+            string orderBy = "", SortDirection orderDirection = SortDirection.Asc, string search = "")
         {
             try
             {
-                var films = await _filmService.GetAllFilms();
+                var films = await _filmService.GetAllFilmsPaginated(pageNumber, pageSize, orderBy, orderDirection, search);
                 return Ok(films);
             }
             catch (Exception)
@@ -66,6 +75,7 @@ namespace Films.API.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+
 
         /// <summary>
         /// Deletes a film by ID.
