@@ -106,17 +106,20 @@ namespace Films.API.Controllers
         /// <param name="filmDto">The DTO containing the film information to create.</param>
         /// <returns>Returns the ID of the created film.</returns>
         [HttpPost("create")]
-        public async Task<ActionResult<int>> CreateFilm(FilmCreateDto filmDto)
+        public async Task<ActionResult<int>> CreateFilm([FromBody] FilmCreateDto filmDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdFilmId = await _filmService.CreateFilm(filmDto);
-                return Ok(createdFilmId);
+                return BadRequest(ModelState);
             }
-            catch (Exception)
+
+            int createdFilmId = await _filmService.CreateFilm(filmDto);
+            return Ok(createdFilmId);
+            
+            /*catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing your request.");
-            }
+            }*/
         }
 
         /// <summary>

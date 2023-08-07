@@ -16,7 +16,6 @@ namespace Films.Infrastructure
         {
             
         }
-        
         /// <summary>
         /// Gets or sets the DbSet for films in the database.
         /// </summary>
@@ -26,5 +25,23 @@ namespace Films.Infrastructure
         /// Gets or sets the DbSet for genres in the database.
         /// </summary>
         private DbSet<Genre>? Genres { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Film>()
+                .HasMany(f => f.Genres)
+                .WithMany() 
+                .UsingEntity(j =>
+                {
+                    
+                    j.Property<int>("Id");
+                });
+        }
+        
+        
     }
 }

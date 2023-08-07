@@ -20,11 +20,11 @@ public class FilmUpdateDto
     /// <summary>
     /// Gets or sets the list of genres associated with the film.
     /// </summary>
-    public List<string>? Genres { get; set; }
+    public List<GenreUpdateDto>? Genres { get; set; }
     /// <summary>
     /// Gets or sets the URL of the film's poster.
     /// </summary>
-    public string? PosterURL { get; set; }
+    public string? PosterUrl { get; set; }
     /// <summary>
     /// Gets or sets the timestamp when the film was created.
     /// </summary>

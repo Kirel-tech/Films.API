@@ -26,7 +26,8 @@ namespace Films.Domain
         /// <summary>
         /// Gets or sets the list of genres associated with the film.
         /// </summary>
-        public List<string>? Genres { get; set; }
+        public List<Genre> Genres { get; set; } = new List<Genre>();
+
         /// <summary>
         /// Gets or sets the URL of the film's poster.
         /// </summary>

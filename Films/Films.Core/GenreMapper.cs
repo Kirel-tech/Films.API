@@ -14,5 +14,7 @@ public class GenreMapper : Profile
     public GenreMapper()
     {
         CreateMap<Genre, GenreDto>().ReverseMap();
+        CreateMap<Genre, GenreCreateDto>().ReverseMap();
+        CreateMap<Genre, GenreUpdateDto>().ReverseMap();
     }
 }

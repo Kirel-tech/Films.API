@@ -3,6 +3,7 @@ using Films.Domain;
 using Films.DTOs;                   
 using Kirel.Repositories.Interfaces;
 using Kirel.Repositories.Sorts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Films.Core
 {
@@ -13,16 +14,19 @@ namespace Films.Core
     {
         private readonly IKirelGenericEntityRepository<int, Film> _filmRepository;
         private readonly IMapper _mapper;
+        private readonly IKirelGenericEntityRepository<int, Genre> _genreRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilmService"/> class.
         /// </summary>
         /// <param name="filmRepository">The repository for accessing film data.</param>
         /// <param name="mapper">AutoMapper instance</param>
-        public FilmService(IKirelGenericEntityRepository<int, Film> filmRepository, IMapper mapper)
+        /// <param name="genreRepository"></param>
+        public FilmService(IKirelGenericEntityRepository<int, Film> filmRepository, IMapper mapper, IKirelGenericEntityRepository<int, Genre> genreRepository)
         {
-            this._filmRepository = filmRepository;
+            _filmRepository = filmRepository;
             _mapper = mapper;
+            _genreRepository = genreRepository;
         }
         /// <summary>
         /// Searches for films in the database by name.
@@ -32,39 +36,60 @@ namespace Films.Core
         public async Task<List<FilmDto>> SearchFilm(string filmName)
         {
             // Search for films in the database based on the provided film name.
-            var existingFilm = await _filmRepository.GetList(m => m.Name != null && m.Name.Contains(filmName));
+            var existingFilms = await _filmRepository.GetList(m => m.Name != null && m.Name.Contains(filmName));
 
-            var enumerable = existingFilm.ToList();
-            if (existingFilm == null || !enumerable.Any())
+            if (existingFilms == null || !existingFilms.Any())
             {
                 throw new FilmNotFoundException($"Film with the title '{filmName}' was not found in the database.");
             }
 
             // Map the retrieved films to DTOs for presentation.
-            var filmsList = enumerable.Select(film => new FilmDto
+            var filmsList = existingFilms.Select(film => new FilmDto
             {
                 Id = film.Id,
                 Name = film.Name,
                 Rating = film.Rating,
                 Description = film.Description,
                 PosterURL = film.PosterUrl,
-                Genres = film.Genres
+                Genres = _mapper.Map<List<GenreDto>>(film.Genres)
             }).ToList();
 
             return filmsList;
         }
+
        /// <summary>
         /// Creates a new film.
         /// </summary>
-        /// <param name="filmDto">The DTO containing the film information to create.</param>
+        /// <param name="filmCreateDto">The DTO containing the film information to create.</param>
         /// <returns>The ID of the created film.</returns>
-        public async Task<int> CreateFilm(FilmCreateDto filmDto)
-        {
-            // Map the DTO to an entity and insert it into the repository.
-            var film = _mapper.Map<Film>(filmDto);
-            var createdFilm = await _filmRepository.Insert(film);
-            return createdFilm.Id;
-        }
+       public async Task<int> CreateFilm(FilmCreateDto filmCreateDto)
+       {
+           Film film = _mapper.Map<Film>(filmCreateDto);
+
+           // Добавьте жанры в фильм, если они указаны в filmCreateDto.GenreNames
+           if (filmCreateDto.GenreNames != null)
+           {
+               foreach (string genreName in filmCreateDto.GenreNames)
+               {
+                   var genre = await _genreRepository.GetList(m => m.Name != null && m.Name.Contains(genreName));
+                   if (genre.Any())
+                   {
+                       film.Genres.Add(genre.First()); // Выберите первый подходящий жанр
+                   }
+                   else
+                   {
+                       // Жанр с указанным названием не найден, создание нового жанра
+                       var newGenre = new Genre { Name = genreName };
+                       film.Genres.Add(newGenre);
+                   }
+               }
+           }
+
+           var createdFilm = await _filmRepository.Insert(film);
+           return createdFilm.Id;
+       }
+
+
 
         /// <summary>
         /// Updates an existing film.
