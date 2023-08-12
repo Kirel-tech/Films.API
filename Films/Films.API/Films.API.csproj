@@ -10,29 +10,28 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="12.0.1" />
-		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-		<PackageReference Include="FluentValidation" Version="11.6.0" />
-		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.6.0" />
-		<PackageReference Include="Kirel.Repositories" Version="1.0.2" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0-preview3.23201.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9" />
-		<PackageReference Include="Microsoft.SqlServer.Server" Version="1.0.0" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="FluentValidation" Version="11.6.0"/>
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.6.0"/>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9"/>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0-preview3.23201.1"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.SqlServer.Server" Version="1.0.0"/>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4"/>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.5"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="..\.dockerignore">
-	    <Link>.dockerignore</Link>
-	  </Content>
+		<Content Include="..\.dockerignore">
+			<Link>.dockerignore</Link>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Films.Core\Films.Core.csproj" />
-	  <ProjectReference Include="..\Films.Infrastructure\Films.Infrastructure.csproj" />
+		<ProjectReference Include="..\Authentication.Shared\Authentication.Shared.csproj"/>
+		<ProjectReference Include="..\Films.Core\Films.Core.csproj"/>
+		<ProjectReference Include="..\Films.Infrastructure\Films.Infrastructure.csproj"/>
 	</ItemGroup>
 
 </Project>

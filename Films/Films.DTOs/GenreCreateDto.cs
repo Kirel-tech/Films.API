@@ -5,7 +5,6 @@ namespace Films.DTOs;
 /// </summary>
 public class GenreCreateDto
 {
-    
     /// <summary>
     /// Gets or sets the name of the genre.
     /// </summary>

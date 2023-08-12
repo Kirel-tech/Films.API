@@ -9,13 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Kirel.Identity.Core" Version="1.0.1" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
-	  <PackageReference Include="Npgsql" Version="7.0.4" />
+		<PackageReference Include="Kirel.Identity.Core" Version="1.0.1"/>
+		<PackageReference Include="Kirel.Repositories.Core" Version="1.0.3"/>
+		<PackageReference Include="Kirel.Repositories.EntityFramework" Version="1.0.3"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9"/>
+		<PackageReference Include="Npgsql" Version="7.0.4"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Films.Domain\Films.Domain.csproj" />
+		<ProjectReference Include="..\Films.Domain\Films.Domain.csproj"/>
 	</ItemGroup>
 
 </Project>

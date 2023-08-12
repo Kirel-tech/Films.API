@@ -1,17 +1,16 @@
 using System.Reflection;
-using Films.Core;
-using Films.Domain;
-using Films.DTOs;
+using Authentication.Shared;
+using Films.API.Extensions;
+using Films.Core.Extensions;
 using Films.Infrastructure;
+using Films.Infrastructure.Extentions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Kirel.Repositories;
-using Kirel.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;                            
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/*var authOptions = builder.Configuration.GetSection("AuthOptions").Get<AuthOptions>();*/
+var jwtOptions = builder.Configuration.GetSection("JwtAuthenticationOptions").Get<JwtAuthenticationOptions>();
 
 //taking connection string from appsettings.json 
 var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
@@ -19,22 +18,23 @@ builder.Services.AddDbContext<FilmDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Add services to the container.
-builder.Services.AddScoped<FilmService>();
-builder.Services.AddScoped<IKirelGenericEntityRepository<int, Film>, KirelGenericEntityFrameworkRepository<int, Film, FilmDbContext>>();
-builder.Services.AddScoped<IKirelGenericEntityRepository<int, Genre>, KirelGenericEntityFrameworkRepository<int, Genre, FilmDbContext>>();
- 
-//Add AutoMapper 
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.CreateMap<FilmCreateDto, Film>()
-        .ForMember(dest => dest.Genres, opt => opt.MapFrom(src => src.GenreNames!.Select(g => new Genre { Name = g })));
-}, Assembly.GetExecutingAssembly());
+builder.Services.AddFilmsServices();
+builder.Services.AddFilmsRepositories();
+
+
+//Add AutoMapper. Class <--> Dto mappings. Configured in Mappings.
+builder.Services.AddMapper();
 
 /*builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());*/
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+//Add authentication 
+builder.Services.AddAuthentication();
+builder.Services.AddAuthenticationConfigurations(jwtOptions);
 
+// Configure swagger
+builder.Services.AddSwagger();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -51,6 +51,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
