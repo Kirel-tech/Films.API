@@ -101,6 +101,29 @@ public class FilmService
         // Сохраняем фильм в базе данных
         await _filmRepository.Insert(film);
     }
+    
+    /// <summary>
+    /// Searching all films which have this genre Id
+    /// </summary>
+    /// <param name="genreIds"></param>
+    /// <returns></returns>
+    public async Task<List<FilmDto>> GetFilmsByGenreIds(List<int> genreIds)
+    {
+        var filmDtos = new List<FilmDto>();
+
+        var films = await _filmRepository.GetList(
+            m => genreIds.Contains(m.Id), // Поиск по идентификаторам жанров
+            includes: q => q.Include(f => f.Genres) // Включение связанных жанров
+        );
+
+        foreach (var film in films)
+        {
+            var filmDto = _mapper.Map<FilmDto>(film);
+            filmDtos.Add(filmDto);
+        }
+
+        return filmDtos;
+    }
 
 
 

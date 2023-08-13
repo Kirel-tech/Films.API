@@ -109,7 +109,17 @@ public class FilmController : ControllerBase
 
         return Ok();
     }
-
+    /// <summary>
+    /// Get all films by genres
+    /// </summary>
+    /// <param name="genreIds">Ids of genres you need </param>
+    /// <returns></returns>
+    [HttpGet("films/by-genre-ids")]
+    public async Task<IActionResult> GetFilmsByGenreIds([FromQuery] List<int> genreIds)
+    {
+        var filmDtos = await _filmService.GetFilmsByGenreIds(genreIds);
+        return Ok(filmDtos);
+    }
     /// <summary>
     /// Updates a film by ID.
     /// </summary>
