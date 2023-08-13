@@ -1,9 +1,12 @@
+using System.Transactions;
 using AutoMapper;
 using Films.Domain.Models;
 using Films.DTOs;
 using Kirel.Repositories.Core.Interfaces;
 using Kirel.Repositories.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Films.Core.Services;
 
@@ -15,6 +18,7 @@ public class FilmService
     private readonly IKirelGenericEntityRepository<int, Film> _filmRepository;
     private readonly IKirelGenericEntityRepository<int, Genre> _genreRepository;
     private readonly IMapper _mapper;
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FilmService" /> class.
@@ -28,6 +32,7 @@ public class FilmService
         _filmRepository = filmRepository;
         _mapper = mapper;
         _genreRepository = genreRepository;
+
     }
 
     /// <summary>
@@ -61,27 +66,46 @@ public class FilmService
     {
         var film = _mapper.Map<Film>(filmCreateDto);
 
-        foreach (var genreName in filmCreateDto.Genres!)
+        var existingGenres = await _genreRepository.GetList(orderBy: null, includes: null, page: 0, pageSize: 0);
+
+        if (filmCreateDto.Genres != null)
         {
-            var existingGenres = await _genreRepository.GetList(g => g.Name == genreName.ToString());
+            var genresToRemove = film.Genres.ToList(); // Создаем список для жанров, которые нужно удалить
 
-            if (!existingGenres.Any())
+            foreach (var genreDto in filmCreateDto.Genres)
             {
-                var newGenre = new Genre { Name = genreName.ToString() };
-                await _genreRepository.Insert(newGenre);
+                var existingGenre = existingGenres.FirstOrDefault(g => g.Name == genreDto.Name);
+                if (existingGenre != null)
+                {
+                    // Прикрепляем существующий жанр к фильму
+                    film.Genres.Add(existingGenre);
 
-                // Add the newly created genre to the list of existing genres
-                existingGenres = new List<Genre> { newGenre };
+                    // Если жанр существует, удаляем его из списка для удаления
+                    genresToRemove.Remove(existingGenre);
+                }
+                else
+                {
+                    // Создаем новый жанр, если он не существует
+                    var newGenre = new Genre { Name = genreDto.Name };
+                    film.Genres.Add(newGenre);
+                }
             }
 
-            foreach (var genre in existingGenres) film.Genres.Add(genre);
+            // Удаляем ненужные жанры из фильма
+            foreach (var genreToRemove in genresToRemove)
+            {
+                film.Genres.Remove(genreToRemove);
+            }
         }
 
+        // Сохраняем фильм в базе данных
         await _filmRepository.Insert(film);
     }
 
 
-    /// <summary>
+
+
+/// <summary>
     /// Updates an existing film.
     /// </summary>
     /// <param name="filmId"> The ID of the film to update. </param>

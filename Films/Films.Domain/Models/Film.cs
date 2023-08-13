@@ -1,4 +1,5 @@
 using Kirel.Repositories.Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Films.Domain.Models;
 
@@ -6,6 +7,7 @@ namespace Films.Domain.Models;
 /// Represents a film entity with details like name, rating, description, and genres.
 /// Implements interfaces for creation timestamp tracking and using an integer as the key.
 /// </summary>
+
 public class Film : ICreatedAtTrackedEntity, IKeyEntity<int>
 {
     /// <summary>
