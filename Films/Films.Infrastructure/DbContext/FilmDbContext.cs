@@ -16,6 +16,18 @@ public class FilmDbContext : DbContext
     {
     }
 
+   
+
+    /// <summary>
+    /// </summary>
+    /// <param name="modelBuilder"> </param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Film>()
+            .HasMany(f => f.Genres)
+            .WithMany(g => g.Film)
+            .UsingEntity(j => j.ToTable("FilmGenres"));
+    }
     /// <summary>
     /// Gets or sets the DbSet for films in the database.
     /// </summary>
@@ -25,15 +37,4 @@ public class FilmDbContext : DbContext
     /// Gets or sets the DbSet for genres in the database.
     /// </summary>
     private DbSet<Genre>? Genres { get; set; }
-
-    /// <summary>
-    /// </summary>
-    /// <param name="modelBuilder"> </param>
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Film>()
-            .HasMany(f => f.Genres)
-            .WithMany(g => g.Films)
-            .UsingEntity(j => j.ToTable("FilmGenres"));
-    }
 }
