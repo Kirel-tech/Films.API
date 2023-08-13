@@ -111,15 +111,15 @@ public class FilmService
     {
         var filmDtos = new List<FilmDto>();
 
-        var films = await _filmRepository.GetList(
-            m => genreIds.Contains(m.Id), // Поиск по идентификаторам жанров
-            includes: q => q.Include(f => f.Genres) // Включение связанных жанров
-        );
-
-        foreach (var film in films)
+        foreach (var genreId in genreIds)
         {
-            var filmDto = _mapper.Map<FilmDto>(film);
-            filmDtos.Add(filmDto);
+            var films = await _filmRepository.GetList(
+                f => f.Genres.Any(g => g.Id == genreId),
+                includes: q => q.Include(f => f.Genres)
+            );
+
+            var genreFilmDtos = _mapper.Map<List<FilmDto>>(films);
+            filmDtos.AddRange(genreFilmDtos);
         }
 
         return filmDtos;
