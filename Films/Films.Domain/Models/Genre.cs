@@ -15,7 +15,7 @@ public class Genre : IKeyEntity<int>, ICreatedAtTrackedEntity
     /// <summary>
     /// reference to film
     /// </summary>
-    public ICollection<Film> Films { get; set; } = new List<Film>();
+    public List<Film> Films { get; set; } = new List<Film>();
 
     /// <summary>
     /// Gets or sets the Created time of genre
