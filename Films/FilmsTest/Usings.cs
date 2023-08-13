@@ -1,0 +1,9 @@
+global using NUnit.Framework;
+global using System.Linq.Expressions;
+global using AutoMapper;
+global using Films.Core.Services;
+global using Films.Domain.Models;
+global using Films.DTOs;
+global using Kirel.Repositories.Core.Interfaces;
+global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using Moq;
