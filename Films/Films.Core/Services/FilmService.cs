@@ -1,9 +1,11 @@
+using System.Linq.Expressions;
 using System.Transactions;
 using AutoMapper;
 using Films.Domain.Models;
 using Films.DTOs;
 using Kirel.Repositories.Core.Interfaces;
 using Kirel.Repositories.Core.Models;
+using Kirel.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -101,7 +103,7 @@ public class FilmService
         // Сохраняем фильм в базе данных
         await _filmRepository.Insert(film);
     }
-    
+
     /// <summary>
     /// Searching all films which have this genre Id
     /// </summary>
@@ -128,7 +130,7 @@ public class FilmService
 
 
 
-/// <summary>
+    /// <summary>
     /// Updates an existing film.
     /// </summary>
     /// <param name="filmId"> The ID of the film to update. </param>
@@ -155,24 +157,45 @@ public class FilmService
     /// <param name="orderBy"> Field by which the results should be ordered. </param>
     /// <param name="orderDirection"> Sorting direction (ascending or descending). </param>
     /// <param name="search"> Search term to filter the results. </param>
+    /// <param name="genreIds">Id of genre which you want to search for  </param>
     /// <returns> Paginated result containing a list of FilmDto objects. </returns>
-    public async Task<PaginatedResult<List<FilmDto>>> GetAllFilmsPaginated(int pageNumber = 0, int pageSize = 0,
-        string orderBy = "", SortDirection orderDirection = SortDirection.Asc, string search = "")
+    public async Task<PaginatedResult<List<FilmDto>>> GetAllFilmsPaginated(
+        int pageNumber = 0, int pageSize = 0,
+        string orderBy = "", SortDirection orderDirection = SortDirection.Asc,
+        string search = "", List<int>? genreIds = null)
     {
-        // Get the total count of films in the database based on the search criteria.
-        var totalCount = await _filmRepository.Count(search);
+        Expression<Func<Film, bool>> expression = null!;
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            Expression<Func<Film, bool>> searchExpression = PredicateBuilder.PredicateSearchInAllFields<Film>(search);
+            expression = searchExpression;
+        }
 
-        // Generate pagination information.
+        if (genreIds != null && genreIds.Any())
+        {
+            Expression<Func<Film, bool>> genreExpression = f => f.Genres.Any(g => genreIds.Contains(g.Id));
+            if (expression == null)
+            {
+                expression = genreExpression;
+            }
+            else
+            {
+                expression = PredicateBuilder.And(expression, genreExpression);
+            }
+        }
+
+        var orderByDelegate = GenerateOrderingMethod<Film>(orderBy, orderDirection);
+        var includesDelegate = GenerateIncludes<Film>();
+
+        var totalCount = await _filmRepository.Count(expression);
+
         var pagination = Pagination.Generate(pageNumber, pageSize, totalCount);
 
-        // Retrieve a paginated list of films based on the pagination and sorting parameters.
-        var films = await _filmRepository.GetList(search, orderBy, orderDirection, pagination.CurrentPage,
+        var films = await _filmRepository.GetList(expression, orderByDelegate, includesDelegate, pagination.CurrentPage,
             pagination.PageSize);
 
-        // Map the retrieved films to DTOs.
         var filmsDto = _mapper.Map<List<FilmDto>>(films);
 
-        // Create and return the paginated result.
         var result = new PaginatedResult<List<FilmDto>>
         {
             Pagination = pagination,
@@ -180,7 +203,8 @@ public class FilmService
         };
         return result;
     }
-    
+
+
 
 
     /// <summary>
@@ -197,6 +221,36 @@ public class FilmService
         // Delete the film from the repository.
         await _filmRepository.Delete(filmId);
     }
+
+
+    private Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> GenerateOrderingMethod<TEntity>(string orderBy,
+        SortDirection orderDirection)
+    {
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderingMethod = null!;
+        if (string.IsNullOrEmpty(orderBy)) return orderingMethod!;
+        var orderExpression = PredicateBuilder.ToLambda<TEntity>(orderBy);
+        if (orderExpression == null) return orderingMethod!;
+        switch (orderDirection)
+        {
+            case SortDirection.Asc:
+                orderingMethod = o => o.OrderBy(orderExpression);
+                break;
+            case SortDirection.Desc:
+                orderingMethod = o => o.OrderByDescending(orderExpression);
+                break;
+        }
+
+        return orderingMethod!;
+    }
+
+    // Генерация делегата для включения связанных данных
+    private Func<IQueryable<TEntity>, IQueryable<TEntity>> GenerateIncludes<TEntity>()
+    {
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includesDelegate = null;
+        
+        return includesDelegate!;
+    }
+
 
     /// <summary>
     /// Custom exception class for indicating that a film was not found.
