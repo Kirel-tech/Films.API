@@ -56,21 +56,33 @@ public class FilmController : ControllerBase
     /// <param name="orderBy"> Field by which the results should be ordered. </param>
     /// <param name="orderDirection"> Sorting direction (ascending or descending). </param>
     /// <param name="search"> Search term to filter the results. </param>
+    /// <param name="genreIds"> </param>
     /// <returns> Paginated result containing a list of FilmDto objects. </returns>
     [HttpGet("all")]
     public async Task<ActionResult<PaginatedResult<List<FilmDto>>>> GetAllFilms(
-        int pageNumber = 0, int pageSize = 10,
-        string orderBy = "", SortDirection orderDirection = SortDirection.Asc, string search = "")
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? orderBy = "",
+        [FromQuery] string orderDirection = "asc",
+        [FromQuery] string? search = "",
+        [FromQuery] List<int>? genreIds = null)
     {
-        try
-        {
-            var films = await _filmService.GetAllFilmsPaginated(pageNumber, pageSize, orderBy, orderDirection, search);
-            return Ok(films);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, "An error occurred while processing your request.");
-        }
+        
+            SortDirection directionEnum;
+            if (orderDirection == "asc")
+            {
+                directionEnum = SortDirection.Asc;
+            }
+            else
+            {
+                directionEnum = SortDirection.Desc;
+            }
+
+            var result = await _filmService.GetAllFilmsPaginated(
+                pageNumber, pageSize, orderBy!, directionEnum, search!, genreIds);
+
+            return Ok(result);
+        
     }
 
 
