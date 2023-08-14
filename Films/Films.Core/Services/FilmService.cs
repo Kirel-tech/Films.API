@@ -185,7 +185,7 @@ public class FilmService
         }
 
         var orderByDelegate = GenerateOrderingMethod<Film>(orderBy, orderDirection);
-        var includesDelegate = GenerateIncludes<Film>();
+        var includesDelegate = GenerateIncludes();
 
         var totalCount = await _filmRepository.Count(expression);
 
@@ -244,10 +244,13 @@ public class FilmService
     }
 
     // Генерация делегата для включения связанных данных
-    private Func<IQueryable<TEntity>, IQueryable<TEntity>> GenerateIncludes<TEntity>()
+    private static Func<IQueryable<Film>, IQueryable<Film>> GenerateIncludes()
     {
-        Func<IQueryable<TEntity>, IQueryable<TEntity>>? includesDelegate = null;
-        
+        Func<IQueryable<Film>, IQueryable<Film>> includesDelegate = query => query.Include(f => f.Genres);
+
+        includesDelegate = query => query.Include(f => f.Genres);
+        // Add other includes for different entity types as needed.
+
         return includesDelegate!;
     }
 
